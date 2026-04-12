@@ -1,0 +1,33 @@
+@import "tailwindcss";
+@import "katex/dist/katex.min.css";
+
+:root {
+  --background: #F5F2ED;
+  --foreground: #141B26;
+}
+
+@theme {
+  --color-wheat: #F5F2ED;
+  --color-teal: #006D77;
+  --color-charcoal: #141B26;
+  --color-stone: #EAE7E2;
+  --color-glass: rgba(255, 255, 255, 0.03);
+
+  --font-heading: "Satoshi", var(--font-inter), sans-serif;
+  --font-body: var(--font-inter), sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
