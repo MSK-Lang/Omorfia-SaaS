@@ -1,15 +1,53 @@
 "use client"; 
 
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'; 
+import React, { useState, useEffect, useMemo } from 'react'; 
 import Link from 'next/link';
-import Webcam from 'react-webcam'; 
-import { Camera, Users, LayoutDashboard, History, Settings, Zap } from 'lucide-react'; 
+import { Camera, Users, LayoutDashboard, History, Settings, Zap, ScanFace } from 'lucide-react'; 
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts'; 
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
+import { createClient } from '@/utils/supabase/client';
 
 export default function Dashboard() { 
-  const webcamRef = useRef<Webcam>(null);
+  const [sessionUser, setSessionUser] = useState<any>(null);
+  const [clinicName, setClinicName] = useState<string>('Unregistered Demo');
+
+  useEffect(() => {
+    async function initUserSession() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // The Bypass Logic
+      let activeUser = user;
+      if (!user && document.cookie.includes('omorfia_dev_session=true')) {
+        activeUser = { 
+          id: 'dev-admin-uuid', // Use a real UUID from your 'organizations' table here if needed
+          email: 'muthu@omorfia.dev', 
+          user_metadata: { full_name: 'Muthu (Admin Mode)' } 
+        } as any;
+      }
+
+      setSessionUser(activeUser);
+
+      if (activeUser) {
+        // Fetch organization based on owner ID
+        const { data: orgData } = await supabase
+          .from('organizations')
+          .select('name')
+          .eq('owner_id', activeUser.id)
+          .single();
+        
+        if (orgData) {
+          setClinicName(orgData.name);
+        } else if (activeUser.id === 'dev-admin-uuid') {
+          setClinicName('Omorfia Global HQ (Dev)');
+        }
+      }
+    }
+    
+    initUserSession();
+  }, []);
+
   const [data, setData] = useState({ 
     texture: 84, 
     pores: 42, 
@@ -31,51 +69,8 @@ export default function Dashboard() {
     { subject: 'Elasticity', A: data.elasticity, fullMark: 100 }, 
   ], [data]); 
 
-  const capture = useCallback(async () => {
-    if (webcamRef.current) {
-      const imageSrc = webcamRef.current.getScreenshot();
-      if (imageSrc) {
-        const start = performance.now();
-        setIsAnalyzing(true);
-        try {
-          const res = await fetch(imageSrc);
-          const blob = await res.blob();
-          const formData = new FormData();
-          formData.append("file", blob, "frame.jpg");
-
-          const response = await fetch("http://localhost:8000/analyze", {
-            method: "POST",
-            body: formData,
-          });
-          const result = await response.json();
-          
-          if (result.status === "success" && result.data) {
-            const normalizedTexture = Math.min(100, (result.data.texture / 12)); 
-            
-            setData(prev => ({
-              ...prev,
-              texture: Math.round(normalizedTexture),
-              pores: Math.round(result.data.pores),
-              redness: Math.round(result.data.redness),
-              oiliness: Math.round(result.data.oiliness),
-              hydration: Math.max(0, 100 - (result.data.oiliness * 0.5) - (result.data.redness * 0.2)),
-              elasticity: Math.max(0, normalizedTexture * 0.8 + 20),
-            }));
-            setLatency(Math.round(performance.now() - start));
-          }
-        } catch (error) {
-          console.error("Analysis failed:", error);
-        } finally {
-          setIsAnalyzing(false);
-        }
-      }
-    }
-  }, [webcamRef]);
-
-  useEffect(() => {
-    const interval = setInterval(capture, 2000);
-    return () => clearInterval(interval);
-  }, [capture]);
+  
+  // Webcam and loop extraction: Offloaded to dedicated `/scan` route.
 
   return ( 
     <div className="min-h-screen bg-wheat text-charcoal font-sans flex"> 
@@ -98,15 +93,17 @@ export default function Dashboard() {
             <h1 className="text-3xl font-semibold tracking-tight text-charcoal">Omorfia Intelligence</h1> 
             <div className="flex items-center gap-3 mt-2"> 
               <span className={`flex h-2 w-2 rounded-full ${isAnalyzing ? 'bg-teal animate-pulse' : 'bg-green-500'}`}></span> 
-              <p className="text-gray-500 text-xs uppercase tracking-[0.2em]">Session Active: Elite Spa London</p> 
+              <p className="text-gray-500 text-xs uppercase tracking-[0.2em]">Session Active: {clinicName}</p> 
             </div> 
           </div> 
           <div className="flex gap-4"> 
             <div className="text-right"> 
               <p className="text-[10px] text-gray-400 uppercase font-bold">Client Focus</p> 
-              <p className="text-sm font-medium">Sarah Jenkins</p> 
+              <p className="text-sm font-medium">{sessionUser?.user_metadata?.full_name || 'Loading...'}</p> 
             </div> 
-            <div className="w-10 h-10 rounded-full bg-stone flex items-center justify-center text-teal font-bold">SJ</div> 
+            <div className="w-10 h-10 rounded-full bg-stone flex items-center justify-center text-teal font-bold uppercase">
+              {sessionUser?.user_metadata?.full_name ? sessionUser.user_metadata.full_name.substring(0, 2) : 'AI'}
+            </div> 
           </div> 
         </header> 
 
@@ -114,26 +111,26 @@ export default function Dashboard() {
           
           {/* THE FEED (Left Side) */} 
           <div className="col-span-7 space-y-6"> 
-            <div className="relative bg-white rounded-2xl p-2 shadow-sm border border-stone"> 
-              <div className="rounded-xl overflow-hidden relative"> 
-                <Webcam 
-                  audio={false}
-                  ref={webcamRef}
-                  screenshotFormat="image/jpeg"
-                  className="w-full h-auto" 
-                  videoConstraints={{
-                    facingMode: "user",
-                    width: 1280,
-                    height: 720
-                  }}
-                /> 
-                {/* Minimalist HUD UI */} 
-                <div className="absolute top-6 left-6 text-white/80 font-mono text-[10px] bg-black/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/10"> 
-                  LUMINANCE: OPTIMAL 
-                </div> 
-                <div className="absolute bottom-6 right-6 text-white/80 font-mono text-[10px] bg-teal/60 backdrop-blur-md px-3 py-1 rounded-full"> 
-                  AI ENGINE v2.4 
-                </div> 
+            
+            {/* INITIATE SCAN ACTION WIDGET */}
+            <div className="relative bg-white rounded-[2rem] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-stone/20 overflow-hidden flex flex-col items-center justify-center min-h-[460px]"> 
+              <div className="absolute inset-0 bg-wheat/30"></div>
+              
+              <div className="relative z-10 flex flex-col items-center text-center">
+                <div className="w-20 h-20 bg-teal/10 rounded-full flex items-center justify-center mb-6 shadow-inner relative">
+                  <div className="absolute inset-0 border border-teal/20 rounded-full animate-ping opacity-20"></div>
+                  <ScanFace className="text-teal" size={36} strokeWidth={1} />
+                </div>
+                
+                <h2 className="font-serif text-3xl font-bold text-charcoal mb-3">Diagnostic Awaiting Setup</h2>
+                <p className="text-charcoal/50 text-sm max-w-sm mb-10 leading-relaxed font-medium">Position the client in optimal ambient lighting before initializing the 15-point clinical scan bridging Sequence.</p>
+                
+                <Link 
+                  href="/scan" 
+                  className="px-10 py-4 bg-teal text-white rounded-full text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-charcoal transition-all shadow-[0_15px_30px_rgb(0,109,119,0.2)] hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Initiate New Scan
+                </Link>
               </div> 
             </div> 
 

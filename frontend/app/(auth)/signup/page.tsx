@@ -4,23 +4,59 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ChevronRight, ShieldCheck, Mail, Lock, User, Building2, Loader2 } from 'lucide-react';
+import { ChevronRight, ShieldCheck, Mail, Lock, User, Building2, Loader2, AlertCircle } from 'lucide-react';
+import { createClient } from '@/utils/supabase/client';
 
 export default function SignupPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const [fullName, setFullName] = useState('');
+  const [clinicName, setClinicName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     
-    // 1. Create Supabase user (Mock)
-    // 2. Insert organization record (Mock)
-    
-    setTimeout(() => {
-      setIsLoading(false);
+    const supabase = createClient();
+
+    try {
+      // 1. Create Supabase user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          }
+        }
+      });
+
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("User creation failed. Please check your details and try again.");
+
+      const userId = authData.user.id;
+
+      // 2. Multi-tenant setup: Create organization using Service Role Key via Server Action
+      const { createOrganization } = await import('@/app/actions/auth');
+      const orgResult = await createOrganization(clinicName, userId);
+
+      if (!orgResult.success) {
+        throw new Error("Failed to create clinic organization: " + orgResult.error);
+      }
+
+      // Success!
       router.push('/dashboard');
-    }, 2000);
+    } catch (err: any) {
+      console.error('Signup process error:', err);
+      setError(err.message || "An unexpected error occurred during registration.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -44,6 +80,13 @@ export default function SignupPage() {
         {/* Form Container */}
         <div className="bg-white p-10 rounded-[2rem] border-[0.5px] border-stone shadow-[0_20px_50px_rgba(20,27,38,0.05)]">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-[#141B26] text-white p-4 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+                <AlertCircle size={18} className="text-red-400 shrink-0" />
+                <p className="text-xs font-medium leading-relaxed">{error}</p>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest ml-1">Full Name</label>
@@ -52,6 +95,8 @@ export default function SignupPage() {
                   <input 
                     required
                     type="text" 
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                     className="w-full bg-wheat/30 border border-stone/50 rounded-2xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:border-teal transition-colors" 
                     placeholder="Sarah Jenkins" 
                   />
@@ -65,6 +110,8 @@ export default function SignupPage() {
                   <input 
                     required
                     type="text" 
+                    value={clinicName}
+                    onChange={(e) => setClinicName(e.target.value)}
                     className="w-full bg-wheat/30 border border-stone/50 rounded-2xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:border-teal transition-colors" 
                     placeholder="Elite Spa London" 
                   />
@@ -79,6 +126,8 @@ export default function SignupPage() {
                 <input 
                   required
                   type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-wheat/30 border border-stone/50 rounded-2xl pl-11 pr-6 py-3.5 text-sm focus:outline-none focus:border-teal transition-colors" 
                   placeholder="admin@omorfia.global" 
                 />
@@ -92,6 +141,8 @@ export default function SignupPage() {
                 <input 
                   required
                   type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-wheat/30 border border-stone/50 rounded-2xl pl-11 pr-6 py-3.5 text-sm focus:outline-none focus:border-teal transition-colors" 
                   placeholder="••••••••" 
                 />
@@ -101,12 +152,16 @@ export default function SignupPage() {
             <div className="pt-2">
               <button 
                 disabled={isLoading}
-                className="w-full py-5 bg-teal text-white rounded-full text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-charcoal transition-all shadow-xl shadow-teal/10 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`w-full py-5 rounded-full text-[11px] font-bold uppercase tracking-[0.2em] transition-all shadow-xl flex items-center justify-center gap-2 disabled:cursor-not-allowed ${
+                  isLoading 
+                    ? "bg-white text-teal border border-teal/20" 
+                    : "bg-teal text-white hover:bg-charcoal shadow-teal/10"
+                }`}
               >
                 {isLoading ? (
                   <>
-                    <Loader2 size={16} className="animate-spin" />
-                    Provisioning...
+                    <Loader2 size={16} className="animate-spin text-teal" />
+                    Creating Clinic...
                   </>
                 ) : (
                   <>

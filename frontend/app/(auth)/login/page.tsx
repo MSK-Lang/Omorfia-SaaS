@@ -4,20 +4,38 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ChevronRight, ShieldCheck, Mail, Lock, Loader2 } from 'lucide-react';
+import { ChevronRight, ShieldCheck, Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
+import { createClient } from '@/utils/supabase/client';
 
 export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Mock Auth logic
-    setTimeout(() => {
-      setIsLoading(false);
+    setError(null);
+
+    const supabase = createClient();
+    try {
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (authError) throw authError;
+
       router.push('/dashboard');
-    }, 1500);
+    } catch (err: any) {
+      console.error('Login process error:', err);
+      setError(err.message || 'Invalid email or password.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -41,6 +59,13 @@ export default function LoginPage() {
         {/* Form Container */}
         <div className="bg-white p-10 rounded-[2rem] border-[0.5px] border-stone shadow-[0_20px_50px_rgba(20,27,38,0.05)]">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-[#141B26] text-white p-4 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+                <AlertCircle size={18} className="text-red-400 shrink-0" />
+                <p className="text-xs font-medium leading-relaxed">{error}</p>
+              </div>
+            )}
+
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest ml-1">Email Address</label>
               <div className="relative">
@@ -48,6 +73,8 @@ export default function LoginPage() {
                 <input 
                   required
                   type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-wheat/30 border border-stone/50 rounded-2xl pl-12 pr-6 py-4 text-sm focus:outline-none focus:border-teal transition-colors" 
                   placeholder="admin@omorfia.global" 
                 />
@@ -64,6 +91,8 @@ export default function LoginPage() {
                 <input 
                   required
                   type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-wheat/30 border border-stone/50 rounded-2xl pl-12 pr-6 py-4 text-sm focus:outline-none focus:border-teal transition-colors" 
                   placeholder="••••••••" 
                 />
