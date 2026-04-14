@@ -156,24 +156,24 @@ export default function LandingPage() {
           </motion.div>
           
           <motion.h1 variants={itemVariants} className="text-6xl md:text-8xl font-semibold tracking-tighter leading-[0.95]">
-            Digital Skin <br />
-            <span className="italic font-serif text-teal">Bio-markers.</span>
+            Autonomous <br />
+            <span className="italic font-serif text-teal">Clinical Growth.</span>
           </motion.h1>
           
           <motion.p variants={itemVariants} className="text-xl text-charcoal/50 max-w-xl leading-relaxed font-medium">
-            The integration-first platform for wellness diagnostics. An API-native SaaS designed to build longitudinal digital twins with heuristic precision.
+            Deploy the world’s first AI-native revenue infrastructure. We don’t just scan skin; we close consultations and book your high-ticket patients autonomously.
           </motion.p>
           
           <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-start sm:items-center gap-8 pt-6">
             <Link 
               href="/signup" 
               onClick={() => handleNav('/signup')}
-              className="group flex items-center gap-4 bg-charcoal text-white px-10 py-5 rounded-full text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-teal transition-all shadow-2xl shadow-charcoal/20 min-w-[200px] justify-center"
+              className="group flex items-center gap-4 bg-charcoal text-white px-10 py-5 rounded-full text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-teal transition-all shadow-2xl shadow-charcoal/20 min-w-[280px] justify-center"
             >
               {navigatingTo === '/signup' ? (
                 <Loader2 size={16} className="animate-spin" />
               ) : (
-                <>Platform Demo <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" /></>
+                <>Apply for Agency Partnership <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" /></>
               )}
             </Link>
             <div className="flex flex-col">
@@ -245,8 +245,8 @@ export default function LandingPage() {
       <section id="platform" className="py-40 px-6 md:px-12 bg-white/40 backdrop-blur-md border-y border-stone relative overflow-hidden">
         <div className="max-w-[1400px] mx-auto space-y-24">
           <div className="text-center space-y-6 max-w-2xl mx-auto">
-            <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-teal">Heuristic Architecture</h2>
-            <h3 className="text-5xl font-semibold tracking-tight">The Integration-First Flow</h3>
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-teal">Full-Cycle Patient Journey</h2>
+            <h3 className="text-5xl font-semibold tracking-tight">You don’t hire a team. You deploy the Omorfia Engine.</h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16 relative">
@@ -254,9 +254,9 @@ export default function LandingPage() {
             <div className="space-y-8 relative">
               <div className="text-[10px] font-mono font-bold text-stone-300 uppercase tracking-widest">Step 01</div>
               <div className="space-y-4">
-                <h4 className="text-2xl font-semibold tracking-tight">Capture</h4>
+                <h4 className="text-2xl font-semibold tracking-tight">Subsurface Intelligence</h4>
                 <p className="text-charcoal/50 text-sm leading-relaxed">
-                  High-resolution image acquisition via any web or mobile interface. Platform-agnostic data intake with real-time normalization.
+                  AI Diagnostics that reveal hidden UV damage and vascular inflammation to create undeniable urgency.
                 </p>
               </div>
             </div>
@@ -265,13 +265,10 @@ export default function LandingPage() {
             <div className="space-y-8 relative">
               <div className="text-[10px] font-mono font-bold text-teal/40 uppercase tracking-widest">Step 02</div>
               <div className="space-y-4">
-                <h4 className="text-2xl font-semibold tracking-tight">Analysis</h4>
+                <h4 className="text-2xl font-semibold tracking-tight">Autonomous Outreach</h4>
                 <p className="text-charcoal/50 text-sm leading-relaxed">
-                  Real-time processing via our OpenCV Heuristic Engine. Deterministic evaluation of epidermal stability and bio-marker variance.
+                  Lead Qualification that follows up with patients automatically, educating them on their specific heuristic needs.
                 </p>
-                <div className="pt-2">
-                  <InlineMath math="L(x,y) = \nabla^2 I" />
-                </div>
               </div>
             </div>
 
@@ -279,9 +276,9 @@ export default function LandingPage() {
             <div className="space-y-8 relative">
               <div className="text-[10px] font-mono font-bold text-stone-300 uppercase tracking-widest">Step 03</div>
               <div className="space-y-4">
-                <h4 className="text-2xl font-semibold tracking-tight">Action</h4>
+                <h4 className="text-2xl font-semibold tracking-tight">Clinical Revenue</h4>
                 <p className="text-charcoal/50 text-sm leading-relaxed">
-                  Instant wellness recommendations and 'Beauty Passport' synchronization. Longitudinal digital twin updates with zero latency.
+                  Booked Treatments directly into your CRM. You only pay for performance and guaranteed outcomes.
                 </p>
               </div>
             </div>
@@ -294,10 +291,10 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 items-center">
           <div className="space-y-16">
             <div className="space-y-6">
-              <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-teal">Platform Capabilities</h2>
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-teal">Agency Outcomes</h2>
               <h3 className="text-5xl font-semibold tracking-tighter leading-tight">
-                Infrastructure Built for <br />
-                Global Scalability.
+                Performance-Based <br />
+                Revenue Sharing.
               </h3>
             </div>
 
@@ -305,56 +302,51 @@ export default function LandingPage() {
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <ShieldCheck size={20} className="text-teal" />
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest">Enterprise Security</span>
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest">Guaranteed Conversions</span>
                 </div>
                 <p className="text-charcoal/50 text-sm leading-relaxed">
-                  Enterprise-Grade Data Isolation via Row-Level Security (RLS). HIPAA-compliant bio-storage protocols.
+                  We drop high-ticket, pre-educated patients straight into your chair. Zero upfront ad spend risk.
                 </p>
               </div>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <Layers size={20} className="text-teal" />
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest">15+ Bio-markers</span>
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest">Exclusive Subsurface Insights</span>
                 </div>
                 <p className="text-charcoal/50 text-sm leading-relaxed">
-                  Real-time analysis of Texture Stability, Pore Density, and Inflammation Index using heuristic heuristics.
+                  Utilize multi-spectral UV and Erythema maps to visually prove the need for high-end aesthetic packages.
                 </p>
               </div>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <Database size={20} className="text-teal" />
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest">API-First SaaS</span>
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest">Frictionless Integration</span>
                 </div>
                 <p className="text-charcoal/50 text-sm leading-relaxed">
-                  Headless diagnostic engine designed for seamless integration into existing POS and CRM wellness stacks.
+                  We plug directly into your existing POS or scheduling system (Zenoti, Phorest, Mindbody) to secure appointments.
                 </p>
               </div>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <Cpu size={20} className="text-teal" />
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest">Cloud-Native Core</span>
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest">Zero Monthly Fees</span>
                 </div>
                 <p className="text-charcoal/50 text-sm leading-relaxed">
-                  Deterministic analysis executed on edge nodes for sub-second global inference latency.
+                  Forget software subscriptions. We act as your autonomous growth partners, earning only when you earn.
                 </p>
               </div>
             </div>
           </div>
 
           <div className="relative">
-            <div className="bg-charcoal rounded-[3rem] p-20 shadow-2xl relative overflow-hidden group">
-              <div className="absolute top-0 left-0 w-full h-full opacity-10 group-hover:opacity-15 transition-opacity">
-                <div className="w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-teal via-transparent to-transparent" />
+            <div className="grid grid-cols-2 gap-6 relative z-10 w-full">
+              <div className="rounded-[2.5rem] bg-charcoal p-2 overflow-hidden shadow-2xl shadow-charcoal/20 relative group">
+                 <div className="absolute top-6 left-6 z-10 px-3 py-1.5 bg-black/60 backdrop-blur-md rounded-full text-[9px] font-mono text-teal uppercase tracking-widest">UV_MAP</div>
+                 <img src="/images/uv_map.png" alt="UV Map" className="w-full h-auto aspect-[3/4] object-cover rounded-[2rem] grayscale-[10%] group-hover:grayscale-0 transition-all duration-700" />
               </div>
-              <div className="relative z-10 flex flex-col items-center text-center space-y-12">
-                <div className="text-white/40 text-[10px] font-mono tracking-[0.4em] uppercase">Digital Twin Engine</div>
-                <div className="text-4xl md:text-6xl font-mono text-teal tracking-tighter select-none">
-                  <BlockMath math="L(x,y) = \frac{\partial^2 I}{\partial x^2} + \frac{\partial^2 I}{\partial y^2}" />
-                </div>
-                <div className="space-y-2">
-                  <p className="text-white/30 text-[9px] uppercase tracking-[0.4em] font-medium">Omorfia_Platform_v1.0</p>
-                  <p className="text-teal/40 text-[9px] uppercase font-mono tracking-widest">Inference: Stable // Heuristic: Active</p>
-                </div>
+              <div className="rounded-[2.5rem] bg-charcoal p-2 overflow-hidden shadow-2xl shadow-charcoal/20 relative group mt-12">
+                 <div className="absolute top-6 left-6 z-10 px-3 py-1.5 bg-black/60 backdrop-blur-md rounded-full text-[9px] font-mono text-teal uppercase tracking-widest">ERYTHEMA</div>
+                 <img src="/images/erythema_map.png" alt="Erythema Map" className="w-full h-auto aspect-[3/4] object-cover rounded-[2rem] grayscale-[10%] group-hover:grayscale-0 transition-all duration-700" />
               </div>
             </div>
           </div>

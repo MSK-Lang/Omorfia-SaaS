@@ -4,6 +4,13 @@ import React, { useRef, useState, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
+
+const calculate_revenue = (melanin_index: number) => {
+  if (melanin_index > 70) return 1500;
+  if (melanin_index > 40) return 850;
+  return 350;
+};
 
 export default function CameraBridge() {
   const webcamRef = useRef<Webcam>(null);
@@ -42,7 +49,7 @@ export default function CameraBridge() {
       formData.append("file", blob, "capture.jpg");
 
       // Removed artificial stalls for high-speed clinical handover
-      const response = await fetch("http://localhost:8000/analyze", {
+      const response = await fetch("http://localhost:8001/analyze", {
         method: "POST",
         body: formData,
       });
@@ -56,10 +63,39 @@ export default function CameraBridge() {
         return;
       }
 
-      if (data.status === "success" && data.data) {
+      if (data.status === "success" && data.data || data.status === "success" && data.metrics) {
+        const payload = data.data || data;
+        
+        // Supabase Sync
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        // Fallback for demo mode
+        const activeUserId = user ? user.id : 'dev-admin-uuid';
+        
+        const leadId = payload.lead_id || crypto.randomUUID();
+        
+        try {
+          await supabase.from('leads').insert({
+            clinic_id: activeUserId,
+            lead_id: leadId,
+            status: 'New',
+            melanin_index: payload.melanin_index || 0,
+            vascular_index: payload.vascular_index || 0,
+            quality_flag: payload.quality_flag || 'OPTIMAL',
+            spectral_data: {
+              uv_map: payload.uv_map || null,
+              erythema_map: payload.erythema_map || null
+            },
+            projected_value: calculate_revenue(payload.melanin_index || 0),
+            raw_payload: payload
+          });
+        } catch (dbErr) {
+          console.error("Failed to sync lead to Supabase:", dbErr);
+        }
+
         localStorage.setItem('omorfia_latest_scan', JSON.stringify(data));
         if (imageSrc) localStorage.setItem('omorfia_scan_image', imageSrc);
-        router.push('/passport/demo-123');
+        router.push(`/passport/${leadId}`);
       }
     } catch (err) {
       console.error(err);

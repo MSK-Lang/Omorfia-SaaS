@@ -1,10 +1,3 @@
-# Omorfia Project Rules
-- ROLE: Lead Architect for B2B Global Beauty SaaS.
-- STYLE: Luxury Clinical. Colors: #121212 (Charcoal), #D4AF37 (Gold).
-- MATH: Prioritize deterministic CV (CLAHE, Laplacian Variance). 
-- STACK: Next.js 14, FastAPI, Supabase.
-- RULE: Every database query must follow Multi-tenant logic (Tenant Isolation via organization_id).
-- GOAL: Professional, monetizable code. No "hackathon" or "student" quality.
 OMORFIA SCALABLE FORTRESS LAWS
 Domain Isolation: Code in /backend/engine (The Brain) must be stateless and must NEVER import PDF, UI, or Database libraries.
 

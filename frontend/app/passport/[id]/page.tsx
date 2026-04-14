@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Share, ChevronLeft, MapPin, User, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, RadarChart as RechartsRadarChart, ResponsiveContainer, Radar as RechartsRadar } from 'recharts';
-import RecommendationEngine from '@/components/passport/RecommendationEngine';
+import { createClient } from '@/utils/supabase/client';
 
 // Helper for dynamic status labels
 const getStatus = (label: string, score: number) => {
@@ -60,9 +60,16 @@ export default function LuxuryPassport() {
   const [mounted, setMounted] = useState(false);
   const [consultantNote, setConsultantNote] = useState<string>('Initialization of dermal profile underway...');
   const [scanImage, setScanImage] = useState<string | null>(null);
+  const [sessionData, setSessionData] = useState<any>({
+    quality_flag: 'OPTIMAL',
+    uv_map: null,
+    erythema_map: null
+  });
   
   const [metrics, setMetrics] = useState({
     biological_skin_age: 26,
+    melanin_index: 35,
+    vascular_index: 40,
     texture: 75,
     pore_density: 40,
     redness: 30,
@@ -80,24 +87,87 @@ export default function LuxuryPassport() {
     elasticity: 84
   });
 
+  const [treatment, setTreatment] = useState({
+    name: 'Standard Hydration Protocol',
+    description: 'Skin barrier is stable. Recommend standard maintenance protocol to preserve structural integrity.',
+    price: 350
+  });
+
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem('omorfia_latest_scan');
-    const storedImg = localStorage.getItem('omorfia_scan_image');
-    if (storedImg) setScanImage(storedImg);
+    
+    async function loadData() {
+      const stored = localStorage.getItem('omorfia_latest_scan');
+      const storedImg = localStorage.getItem('omorfia_scan_image');
+      if (storedImg) setScanImage(storedImg);
+  
+      let payload: any = null;
+      if (stored) {
+        try {
+          payload = JSON.parse(stored);
+          if (payload.data) setMetrics(prev => ({ ...prev, ...payload.data }));
+          else if (payload.metrics) setMetrics(prev => ({ ...prev, ...payload.metrics }));
+          else setMetrics(prev => ({ ...prev, ...payload }));
+          
+          if (payload.consultant_note) setConsultantNote(payload.consultant_note);
+          if (payload.quality_flag) {
+            setSessionData({
+              quality_flag: payload.quality_flag,
+              uv_map: payload.uv_map || null,
+              erythema_map: payload.erythema_map || null
+            });
+          }
+        } catch(e) {
+          console.error("Failed to parse OMORFIA payload", e);
+        }
+      }
 
-    if (stored) {
+      // Dynamic Treatment Initialization via Supabase
       try {
-        const payload = JSON.parse(stored);
-        if (payload.data) setMetrics(prev => ({ ...prev, ...payload.data }));
-        else if (payload.metrics) setMetrics(prev => ({ ...prev, ...payload.metrics }));
-        else setMetrics(prev => ({ ...prev, ...payload }));
-        
-        if (payload.consultant_note) setConsultantNote(payload.consultant_note);
-      } catch(e) {
-        console.error("Failed to parse OMORFIA payload", e);
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user && payload) {
+          const { data: orgData } = await supabase
+            .from('organizations')
+            .select('id')
+            .eq('owner_id', user.id)
+            .single();
+  
+          if (orgData) {
+            const { data: treatments } = await supabase
+              .from('treatment_menu')
+              .select('service_name, price, description, trigger_metric, threshold_min')
+              .eq('clinic_id', orgData.id);
+  
+            if (treatments && treatments.length > 0) {
+              let selected: any = null;
+              for (const t of treatments) {
+                 const metricName = t.trigger_metric;
+                 const threshold = t.threshold_min;
+                 const val = payload[metricName] ?? (payload.metrics?.[metricName] ?? 0);
+                 if (val >= threshold) {
+                    if (!selected || t.price > selected.price) {
+                       selected = t;
+                    }
+                 }
+              }
+              
+              if (selected) {
+                setTreatment({
+                   name: selected.service_name,
+                   description: selected.description,
+                   price: selected.price
+                });
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to bind dynamic treatments:", err);
       }
     }
+    
+    loadData();
   }, []);
 
   if (!mounted) return null;
@@ -154,18 +224,34 @@ export default function LuxuryPassport() {
       </header>
 
       <div className="relative z-10 lg:grid lg:grid-cols-12 lg:gap-16 lg:items-start lg:max-w-7xl lg:mx-auto lg:px-8 pt-4 w-full flex-grow">
-        <div className="lg:col-span-5 lg:sticky lg:top-8 w-full flex flex-col items-center">
+        <div className="lg:col-span-5 w-full flex flex-col items-center">
           
           <div className="flex flex-col items-center w-full mb-8">
-            <div className="relative w-full aspect-[3/4] max-w-[320px] rounded-[3.5rem] overflow-hidden shadow-[0_40px_80px_rgba(0,109,119,0.15)] border-[2px] border-[#006D77] group bg-white">
-              <div className="absolute inset-0 bg-[#F5F5DC]/40 z-0"></div>
-              {scanImage ? (
-                <img src={scanImage} alt="Clinical Portrait" className="absolute inset-0 w-full h-full object-cover z-10" />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-[9px] font-mono tracking-[0.2em] text-[#006D77]/40 z-10">ARCHIVE RECOVERY...</div>
-              )}
-              <div className="absolute top-8 left-8 w-6 h-6 border-t border-l border-[#006D77]/60 z-20" />
-              <div className="absolute bottom-8 right-8 w-6 h-6 border-b border-r border-[#006D77]/60 z-20" />
+            {sessionData.quality_flag === 'MANUAL_REVIEW_RECOMMENDED' && (
+              <div className="mb-4 bg-yellow-100 border border-yellow-400 text-yellow-800 text-[10px] uppercase tracking-widest font-bold px-4 py-3 rounded-xl flex items-center justify-center text-center shadow-sm w-full max-w-[320px]">
+                ⚠️ Clinical Alert: Manual Review Recommended. Capture conditions suboptimal.
+              </div>
+            )}
+            
+            <div className="flex flex-col gap-6 w-full max-w-[320px]">
+              {/* Original */}
+              <div className="relative w-full aspect-[3/4] rounded-[2.5rem] overflow-hidden shadow-lg border-[2px] border-[#006D77] group bg-white">
+                <div className="absolute top-4 left-4 z-20 px-3 py-1 bg-[#006D77]/80 backdrop-blur-md rounded-full text-[9px] text-white font-mono tracking-widest uppercase">Visible Light</div>
+                {scanImage ? <img src={scanImage} alt="Original" className="absolute inset-0 w-full h-full object-cover z-10" /> : <div className="absolute inset-0 flex items-center justify-center text-[9px] uppercase tracking-widest opacity-40">Missing</div>}
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                {/* UV Map (Clinical Lens) */}
+                <div className="relative w-full aspect-square rounded-full overflow-hidden shadow-xl border border-white/10 group bg-charcoal">
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-[8px] text-white font-mono tracking-widest uppercase shadow-md pointer-events-none">UV Map</div>
+                  {sessionData.uv_map ? <img src={sessionData.uv_map} alt="UV Map" className="absolute inset-0 w-full h-full object-cover z-10 transition-transform duration-700 hover:scale-110" /> : <div className="absolute inset-0 flex items-center justify-center text-[8px] uppercase tracking-widest text-[#006D77] opacity-60">Wait</div>}
+                </div>
+                {/* Erythema Map (Clinical Lens) */}
+                <div className="relative w-full aspect-square rounded-full overflow-hidden shadow-xl border border-white/10 group bg-charcoal">
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-[8px] text-white font-mono tracking-widest uppercase shadow-md pointer-events-none">Erythema</div>
+                  {sessionData.erythema_map ? <img src={sessionData.erythema_map} alt="Erythema Map" className="absolute inset-0 w-full h-full object-cover z-10 transition-transform duration-700 hover:scale-110" /> : <div className="absolute inset-0 flex items-center justify-center text-[8px] uppercase tracking-widest text-[#006D77] opacity-60">Wait</div>}
+                </div>
+              </div>
             </div>
 
             <section className="flex flex-col items-center justify-center pt-8 pb-4 w-full relative overflow-visible">
@@ -209,7 +295,24 @@ export default function LuxuryPassport() {
             </ResponsiveContainer>
           </div>
 
-          <RecommendationEngine metrics={metrics} />
+          {/* THE CLOSER CARD */}
+          <div className="w-[90%] mx-auto lg:w-full bg-[#006D77] text-white rounded-[2rem] p-8 shadow-[0_20px_40px_rgb(0,109,119,0.2)] relative overflow-hidden mb-10"> 
+            <div className="relative z-10"> 
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60 mb-3">Automated Treatment Recommendation</h3> 
+              <h4 className="text-3xl font-serif mb-3 italic">{treatment.name}</h4> 
+              <p className="text-sm opacity-90 leading-relaxed font-medium"> 
+                {treatment.description}
+              </p> 
+              <div className="mt-6 bg-white/10 border border-white/20 px-6 py-4 rounded-[1.5rem] flex justify-between items-center">
+                <span className="text-[10px] uppercase tracking-widest font-bold">Estimated Revenue</span>
+                <span className="text-2xl font-bold">${treatment.price.toLocaleString()}</span>
+              </div>
+              <button className="mt-6 w-full bg-white text-[#006D77] py-4 rounded-full text-[11px] font-bold uppercase tracking-widest hover:bg-[#F5F5DC] transition-all shadow-lg active:scale-[0.98]"> 
+                Initiate Consultation
+              </button> 
+            </div> 
+          </div> 
+
 
           <div className="px-5 lg:px-0 relative z-10 w-full max-w-md lg:max-w-full mx-auto mt-8">
             <div className="flex space-x-2 p-1.5 bg-white/60 backdrop-blur-md rounded-full shadow-sm mb-8 border border-white">

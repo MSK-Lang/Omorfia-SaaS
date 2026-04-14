@@ -11,6 +11,8 @@ import { createClient } from '@/utils/supabase/client';
 export default function Dashboard() { 
   const [sessionUser, setSessionUser] = useState<any>(null);
   const [clinicName, setClinicName] = useState<string>('Unregistered Demo');
+  const [leads, setLeads] = useState<any[]>([]);
+
 
   useEffect(() => {
     async function initUserSession() {
@@ -42,7 +44,17 @@ export default function Dashboard() {
         } else if (activeUser.id === 'dev-admin-uuid') {
           setClinicName('Omorfia Global HQ (Dev)');
         }
+
+        // Fetch Leads
+        const { data: leadsData, error } = await supabase
+          .from('leads')
+          .select('*')
+          .eq('clinic_id', activeUser.id)
+          .order('created_at', { ascending: false })
+          .limit(5);
+        if (leadsData) setLeads(leadsData);
       }
+
     }
     
     initUserSession();
@@ -170,22 +182,48 @@ export default function Dashboard() {
               </ResponsiveContainer> 
             </div> 
 
-            {/* RECOMMENDATION ENGINE */} 
-            <div className="bg-teal text-white rounded-2xl p-8 shadow-lg relative overflow-hidden"> 
-              <Zap className="absolute -right-4 -bottom-4 text-white/10" size={120} /> 
-              <div className="relative z-10"> 
-                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60 mb-4">Recommended Protocol</h3> 
-                <h4 className="text-xl font-serif mb-2 italic">
-                  {data.texture < 60 ? "Deep Sea Mineral Infusion" : "Hydra-Silk Preservation"}
-                </h4> 
-                <p className="text-sm opacity-80 leading-relaxed max-w-[280px]"> 
-                  Based on your <span className="font-bold">Texture Stability ({data.texture}%)</span> and hydration levels, we suggest a high-pressure mineral mist to restore the lipid barrier. 
-                </p> 
-                <button className="mt-6 bg-white text-teal px-6 py-2 rounded-full text-xs font-bold uppercase hover:bg-wheat transition-all"> 
-                  Book Treatment — £120 
-                </button> 
-              </div> 
-            </div> 
+            {/* HIGH-INTENT LEADS TABLE */} 
+            <div className="bg-white rounded-2xl p-8 shadow-sm border border-stone"> 
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400">High-Intent Leads</h3> 
+                <span className="text-[10px] font-bold text-teal bg-teal/10 px-3 py-1 rounded-full uppercase">Real-Time Sync</span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-stone/50">
+                      <th className="py-3 text-[10px] uppercase tracking-widest text-gray-400 font-bold">Status</th>
+                      <th className="py-3 text-[10px] uppercase tracking-widest text-gray-400 font-bold">Melanin Idx</th>
+                      <th className="py-3 text-[10px] uppercase tracking-widest text-gray-400 font-bold text-right">Projected Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {leads.length > 0 ? leads.map((lead) => (
+                      <tr key={lead.id || lead.lead_id} className="border-b border-stone/20 hover:bg-wheat/20 transition-colors cursor-pointer" onClick={() => window.location.href = `/passport/${lead.lead_id}`}>
+                        <td className="py-4">
+                          <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${lead.status === 'New' ? 'bg-teal/10 text-teal' : 'bg-stone-100 text-stone-500'}`}>
+                            {lead.status || 'New'}
+                          </span>
+                        </td>
+                        <td className="py-4">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-charcoal">{lead.melanin_index || 0}</span>
+                            {lead.melanin_index > 70 && <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" title="High Damage"></span>}
+                          </div>
+                        </td>
+                        <td className="py-4 text-right">
+                          <span className="text-sm font-bold text-[#006D77]">${lead.projected_value || 0}</span>
+                        </td>
+                      </tr>
+                    )) : (
+                      <tr>
+                        <td colSpan={3} className="py-8 text-center text-xs text-stone-400 font-medium">Awaiting Clinical Captures...</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
           </div> 
         </div> 
