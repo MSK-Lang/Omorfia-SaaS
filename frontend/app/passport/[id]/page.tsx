@@ -227,6 +227,18 @@ export default function LuxuryPassport() {
         <div className="lg:col-span-5 w-full flex flex-col items-center">
           
           <div className="flex flex-col items-center w-full mb-8">
+            {/* Revenue Potential Badge */}
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 bg-white/90 backdrop-blur-md border-[1.5px] border-[#D4AF37] px-6 py-2.5 rounded-full flex items-center shadow-[0_0_20px_rgba(212,175,55,0.15)] hover:shadow-[0_0_25px_rgba(212,175,55,0.3)] transition-all duration-500 group"
+            >
+              <div className="w-2 h-2 rounded-full bg-[#D4AF37] mr-3 animate-pulse" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#006D77]">
+                Projected Case Value: <span className="text-[#D4AF37] ml-1 font-black">${treatment.price.toLocaleString()}</span>
+              </span>
+            </motion.div>
+
             {sessionData.quality_flag === 'MANUAL_REVIEW_RECOMMENDED' && (
               <div className="mb-4 bg-yellow-100 border border-yellow-400 text-yellow-800 text-[10px] uppercase tracking-widest font-bold px-4 py-3 rounded-xl flex items-center justify-center text-center shadow-sm w-full max-w-[320px]">
                 ⚠️ Clinical Alert: Manual Review Recommended. Capture conditions suboptimal.
