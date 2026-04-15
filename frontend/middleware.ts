@@ -42,22 +42,39 @@ export async function middleware(request: NextRequest) {
   // Retrieve the actual active Supabase session
   const { data: { session } } = await supabase.auth.getSession();
 
-  const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/passport');
+  // Route Protection Logic
+  const pathname = request.nextUrl.pathname;
+  const isProtectedRoute = pathname.startsWith('/dashboard') || 
+                           pathname.startsWith('/passport') || 
+                           pathname.startsWith('/admin') || 
+                           pathname.startsWith('/scanner');
 
-  if (isProtectedRoute && !session) {
-    // Check if the developer bypass is active before throwing out to login
-    if (isDevBypassActive) {
-       console.log('Middleware: Dev Gatekeeper session approved. Bypassing Supabase Auth.');
-       return response;
-    }
-    
-    // Normal routing: unauthorized user attempting to access a secure app path
+  if (isProtectedRoute && !session && !isDevBypassActive) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = '/login';
     return NextResponse.redirect(loginUrl);
   }
 
-  // If they have a valid Supabase session, or they are on a public route, proceed normally.
+  // Agency Gatekeeper Routing
+  if (session || isDevBypassActive) {
+    const role = session?.user?.user_metadata?.role || 'operator';
+    
+    // Redirect /dashboard to the appropriate portal
+    if (pathname === '/dashboard') {
+      const targetPath = role === 'stakeholder' ? '/admin' : '/scanner';
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = targetPath;
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    // Role-based Access Control (RBAC)
+    if (pathname.startsWith('/admin') && role !== 'stakeholder') {
+      const scannerUrl = request.nextUrl.clone();
+      scannerUrl.pathname = '/scanner';
+      return NextResponse.redirect(scannerUrl);
+    }
+  }
+
   return response;
 }
 

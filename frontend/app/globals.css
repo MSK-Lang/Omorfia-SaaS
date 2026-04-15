@@ -2,16 +2,16 @@
 @import "katex/dist/katex.min.css";
 
 :root {
-  --background: #F5F2ED;
-  --foreground: #141B26;
+  --background: #F5E6D3;
+  --foreground: #0F172A;
 }
 
 @theme {
-  --color-wheat: #F5F2ED;
-  --color-teal: #006D77;
-  --color-charcoal: #141B26;
-  --color-stone: #EAE7E2;
-  --color-glass: rgba(255, 255, 255, 0.03);
+  --color-wheat: #F5E6D3;
+  --color-teal: #008080;
+  --color-charcoal: #0F172A;
+  --color-stone: #E5D5C0;
+  --color-glass: rgba(255, 255, 255, 0.4);
 
   --font-heading: "Satoshi", var(--font-inter), sans-serif;
   --font-body: var(--font-inter), sans-serif;

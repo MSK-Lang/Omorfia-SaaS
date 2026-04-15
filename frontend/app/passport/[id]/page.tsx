@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Share, ChevronLeft, MapPin, User, Calendar } from 'lucide-react';
+import { Share, ChevronLeft, MapPin, User, Calendar, Sparkles, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, RadarChart as RechartsRadarChart, ResponsiveContainer, Radar as RechartsRadar } from 'recharts';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, Radar as RechartsRadar } from 'recharts';
 import { createClient } from '@/utils/supabase/client';
 
 // Helper for dynamic status labels
@@ -26,13 +26,13 @@ const CircularProgress = ({ label, score }: { label: string, score: number }) =>
   const status = getStatus(label, score);
 
   return (
-    <div className="flex items-center p-4 bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-stone/20 hover:border-[#006D77]/20 transition-colors">
+    <div className="flex items-center p-4 bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-stone/20 hover:border-teal/20 transition-colors">
       <div className="relative w-14 h-14 shrink-0 flex items-center justify-center">
         <svg className="w-full h-full transform -rotate-90">
           <circle cx="28" cy="28" r="24" stroke="#E2E8F0" strokeWidth="3" fill="transparent" />
           <motion.circle 
             cx="28" cy="28" r="24" 
-            stroke="#006D77" 
+            stroke="#008080" 
             strokeWidth="4" 
             fill="transparent"
             strokeDasharray={2 * Math.PI * 24}
@@ -43,13 +43,13 @@ const CircularProgress = ({ label, score }: { label: string, score: number }) =>
             transition={{ duration: 1.5, ease: "easeOut", type: "spring", bounce: 0.2 }}
           />
         </svg>
-        <div className="absolute inset-0 flex items-center justify-center font-bold text-[11px] text-[#006D77]">
+        <div className="absolute inset-0 flex items-center justify-center font-bold text-[11px] text-teal">
           {Math.round(score)}
         </div>
       </div>
       <div className="ml-4 flex-1">
         <h4 className="font-bold text-charcoal tracking-tight">{label}</h4>
-        <p className="text-[9px] text-[#006D77] uppercase tracking-[0.2em] font-bold mt-0.5 opacity-80">{status}</p>
+        <p className="text-[9px] text-teal uppercase tracking-[0.2em] font-bold mt-0.5 opacity-80">{status}</p>
       </div>
     </div>
   );
@@ -197,8 +197,8 @@ export default function LuxuryPassport() {
   };
 
   const pulseColors = metrics.biological_skin_age < 30 
-    ? ["#006D77", "#D4AF37", "#006D77"] 
-    : ["#006D77", "#008B99", "#006D77"];
+    ? ["#008080", "#C5B358", "#008080"] 
+    : ["#008080", "#00A3A3", "#008080"];
 
   const radarData = [
     { subject: 'Clarity', score: Math.round(((100-metrics.redness) + (100-metrics.blemish_severity) + (100-metrics.pore_density) + (100-metrics.dark_circle_index) + (100-metrics.uv_damage)) / 5) },
@@ -209,131 +209,152 @@ export default function LuxuryPassport() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F5F5DC] flex flex-col font-sans text-charcoal relative">
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-[#006D77]/10 rounded-full blur-[120px]"></div>
-        <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-[#006D77]/5 rounded-full blur-[100px]"></div>
-      </div>
-
-      <header className="p-6 flex justify-between items-center relative z-20 max-w-7xl mx-auto w-full">
-        <Link href="/dashboard" className="p-2 bg-white/50 backdrop-blur-md rounded-full hover:bg-white transition-colors duration-300 shadow-sm border border-[#006D77]/10">
-          <ChevronLeft size={20} className="text-[#006D77]" />
-        </Link>
-        <span className="font-serif font-bold text-[#006D77] text-xl tracking-tight drop-shadow-sm">Omorfia Passport</span>
-        <div className="w-10" />
-      </header>
-
-      <div className="relative z-10 lg:grid lg:grid-cols-12 lg:gap-16 lg:items-start lg:max-w-7xl lg:mx-auto lg:px-8 pt-4 w-full flex-grow">
-        <div className="lg:col-span-5 w-full flex flex-col items-center">
+    <div className="min-h-screen bg-[#F5E6D3] flex flex-col items-center py-12 px-4 pb-32 font-sans text-charcoal selection:bg-teal selection:text-white relative">
+      <div className="w-full max-w-[1100px] grid grid-cols-1 lg:grid-cols-12 gap-12 relative z-10">
+        
+        {/* 1. Global Header (Spans all 12 columns) */}
+        <header className="lg:col-span-12 text-center space-y-4 mb-4">
+          <div className="flex items-center justify-between w-full mb-8">
+             <Link href="/dashboard" className="p-3 bg-white/80 backdrop-blur-md rounded-full hover:bg-white transition-all shadow-sm border border-stone/20">
+              <ChevronLeft size={20} className="text-teal" />
+            </Link>
+            <div className="w-10 h-10 bg-teal text-white rounded-xl flex items-center justify-center font-serif font-bold text-xl italic shadow-lg">Ω</div>
+            <div className="w-10" /> 
+          </div>
           
-          <div className="flex flex-col items-center w-full mb-8">
-            {/* Revenue Potential Badge */}
+          <h1 className="text-5xl md:text-6xl font-serif font-bold text-teal tracking-tighter italic drop-shadow-sm">
+            Omorfia Passport
+          </h1>
+          <div className="flex justify-center">
             <motion.div 
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-6 bg-white/90 backdrop-blur-md border-[1.5px] border-[#D4AF37] px-6 py-2.5 rounded-full flex items-center shadow-[0_0_20px_rgba(212,175,55,0.15)] hover:shadow-[0_0_25px_rgba(212,175,55,0.3)] transition-all duration-500 group"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-teal text-white border border-white/20 px-6 py-2.5 rounded-full flex items-center shadow-lg shadow-teal/20"
             >
-              <div className="w-2 h-2 rounded-full bg-[#D4AF37] mr-3 animate-pulse" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#006D77]">
-                Projected Case Value: <span className="text-[#D4AF37] ml-1 font-black">${treatment.price.toLocaleString()}</span>
+              <Sparkles size={14} className="mr-3" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em]">
+                Projected Case Value: <span className="text-white ml-1 font-black">${treatment.price.toLocaleString()}</span>
               </span>
             </motion.div>
+          </div>
+        </header>
 
-            {sessionData.quality_flag === 'MANUAL_REVIEW_RECOMMENDED' && (
-              <div className="mb-4 bg-yellow-100 border border-yellow-400 text-yellow-800 text-[10px] uppercase tracking-widest font-bold px-4 py-3 rounded-xl flex items-center justify-center text-center shadow-sm w-full max-w-[320px]">
-                ⚠️ Clinical Alert: Manual Review Recommended. Capture conditions suboptimal.
+        {/* 2. Left Column (Visual Intelligence - lg:col-span-5) */}
+        <aside className="lg:col-span-5 flex flex-col gap-6">
+          {/* Clinical Alert Card */}
+          {sessionData.quality_flag === 'MANUAL_REVIEW_RECOMMENDED' && (
+            <div className="bg-amber-50 border border-amber-200 p-6 rounded-3xl flex items-center gap-4 shadow-sm">
+              <div className="p-3 bg-amber-100 rounded-2xl text-amber-600">
+                 <AlertCircle size={24} />
               </div>
+              <div>
+                <p className="text-[9px] uppercase tracking-[0.2em] font-black text-amber-800/60 mb-0.5">Clinical Alert</p>
+                <h4 className="text-xs font-bold text-amber-900 leading-tight">AI Engine detected suboptimal capture conditions. Manual Review Recommended.</h4>
+              </div>
+            </div>
+          )}
+
+          {/* Hero Scan Image */}
+          <div className="w-full aspect-square relative rounded-[2.5rem] overflow-hidden border-2 border-white/50 shadow-xl bg-white">
+            <div className="absolute top-6 left-6 z-20 px-4 py-1.5 bg-teal/90 backdrop-blur-md rounded-full text-[9px] text-white font-black tracking-widest uppercase">Visible Light</div>
+            {scanImage ? (
+              <img src={scanImage} alt="Hero" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-stone-300 font-mono text-[10px] uppercase tracking-widest bg-stone-50">Signal Missing</div>
             )}
+          </div>
+
+          {/* Spectral Maps Grid */}
+          <div className="grid grid-cols-2 gap-4">
+             <div className="relative aspect-square rounded-[2rem] overflow-hidden border-2 border-white/50 shadow-lg bg-charcoal">
+               <div className="absolute bottom-4 left-4 z-20 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-[8px] text-white font-black tracking-widest uppercase">UV Map</div>
+               {sessionData.uv_map ? <img src={sessionData.uv_map} alt="UV" className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" /> : <div className="absolute inset-0 flex items-center justify-center text-[8px] uppercase tracking-widest text-teal opacity-40">Analyzing...</div>}
+             </div>
+             <div className="relative aspect-square rounded-[2rem] overflow-hidden border-2 border-white/50 shadow-lg bg-charcoal">
+               <div className="absolute bottom-4 left-4 z-20 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-[8px] text-white font-black tracking-widest uppercase">Erythema</div>
+               {sessionData.erythema_map ? <img src={sessionData.erythema_map} alt="Erythema" className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" /> : <div className="absolute inset-0 flex items-center justify-center text-[8px] uppercase tracking-widest text-teal opacity-40">Analyzing...</div>}
+             </div>
+          </div>
+
+          {/* Biological Age Card */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-[2.5rem] border-2 border-white/50 shadow-lg p-10 flex flex-col items-center justify-center relative overflow-hidden h-64">
+            <motion.div className="absolute inset-0 rounded-full blur-[80px] pointer-events-none opacity-20 z-0" animate={{ backgroundColor: pulseColors }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} />
+            <div className="relative z-10 flex flex-col items-center">
+              <span className="text-[10px] uppercase tracking-[0.5em] font-black text-teal mb-2">Biological Age</span>
+              <motion.span key={metrics.biological_skin_age} initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-serif text-[80px] leading-none font-bold text-charcoal tracking-tighter">
+                {Math.round(metrics.biological_skin_age)}
+              </motion.span>
+              <div className="mt-4 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-teal animate-pulse"></span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-stone-400">Verified Precision</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Clinical Insights & Session Profile */}
+          <div className="space-y-4">
+            <div className="bg-white/90 backdrop-blur-md p-6 rounded-[2rem] border border-stone/20 shadow-sm">
+              <h4 className="text-[9px] uppercase tracking-[0.3em] font-black text-teal mb-3">Clinical Context</h4>
+              <p className="text-sm font-serif italic text-charcoal/90 leading-relaxed font-medium">"{consultantNote}"</p>
+            </div>
             
-            <div className="flex flex-col gap-6 w-full max-w-[320px]">
-              {/* Original */}
-              <div className="relative w-full aspect-[3/4] rounded-[2.5rem] overflow-hidden shadow-lg border-[2px] border-[#006D77] group bg-white">
-                <div className="absolute top-4 left-4 z-20 px-3 py-1 bg-[#006D77]/80 backdrop-blur-md rounded-full text-[9px] text-white font-mono tracking-widest uppercase">Visible Light</div>
-                {scanImage ? <img src={scanImage} alt="Original" className="absolute inset-0 w-full h-full object-cover z-10" /> : <div className="absolute inset-0 flex items-center justify-center text-[9px] uppercase tracking-widest opacity-40">Missing</div>}
+            <div className="bg-stone-50/50 p-6 rounded-[2rem] border border-stone/10 opacity-70">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 text-charcoal/60 text-[10px] font-bold uppercase tracking-widest"><MapPin size={12} /> Global HQ (Demo)</div>
+                <div className="flex items-center gap-3 text-charcoal/60 text-[10px] font-bold uppercase tracking-widest"><Calendar size={12} /> Valid: {new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
               </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                {/* UV Map (Clinical Lens) */}
-                <div className="relative w-full aspect-square rounded-full overflow-hidden shadow-xl border border-white/10 group bg-charcoal">
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-[8px] text-white font-mono tracking-widest uppercase shadow-md pointer-events-none">UV Map</div>
-                  {sessionData.uv_map ? <img src={sessionData.uv_map} alt="UV Map" className="absolute inset-0 w-full h-full object-cover z-10 transition-transform duration-700 hover:scale-110" /> : <div className="absolute inset-0 flex items-center justify-center text-[8px] uppercase tracking-widest text-[#006D77] opacity-60">Wait</div>}
+            </div>
+          </div>
+        </aside>
+
+        {/* 3. Right Column (Revenue Intelligence - lg:col-span-7) */}
+        <main className="lg:col-span-7 flex flex-col gap-8">
+          {/* Diagnostic Radar Profile Card */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-[3rem] p-10 shadow-sm border border-stone/20 flex flex-col min-h-[500px]">
+            <header className="mb-8">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-300 mb-2">Diagnostic Profile</h3>
+              <p className="text-3xl font-serif text-charcoal font-bold italic tracking-tight">Architectural Shape</p>
+            </header>
+            <div className="flex-1 w-full min-h-[350px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                  <PolarGrid stroke="#E5D5C0" strokeDasharray="3 3" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#008080', fontSize: 11, fontWeight: "900" }} />
+                  <Radar name="Patient" dataKey="score" stroke="#008080" strokeWidth={3} fill="#008080" fillOpacity={0.1} />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Treatment Protocol (The Closer) Card */}
+          <div className="bg-[#008080] text-white rounded-[3rem] p-12 shadow-[0_30px_60px_rgba(0,128,128,0.25)] relative overflow-hidden">
+             <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-3xl" />
+             <header className="flex justify-between items-center mb-10">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] opacity-60">Revenue Handover Triggered</h3>
+                <div className="bg-white text-teal px-5 py-2 rounded-full text-[10px] font-black tracking-widest shadow-xl">
+                  ${treatment.price.toLocaleString()} PROJECTED
                 </div>
-                {/* Erythema Map (Clinical Lens) */}
-                <div className="relative w-full aspect-square rounded-full overflow-hidden shadow-xl border border-white/10 group bg-charcoal">
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-[8px] text-white font-mono tracking-widest uppercase shadow-md pointer-events-none">Erythema</div>
-                  {sessionData.erythema_map ? <img src={sessionData.erythema_map} alt="Erythema Map" className="absolute inset-0 w-full h-full object-cover z-10 transition-transform duration-700 hover:scale-110" /> : <div className="absolute inset-0 flex items-center justify-center text-[8px] uppercase tracking-widest text-[#006D77] opacity-60">Wait</div>}
-                </div>
-              </div>
-            </div>
-
-            <section className="flex flex-col items-center justify-center pt-8 pb-4 w-full relative overflow-visible">
-              <motion.div className="absolute w-64 h-64 rounded-full blur-[70px] pointer-events-none opacity-25 z-0" animate={{ backgroundColor: pulseColors }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} />
-              <div className="relative z-10 flex flex-col items-center bg-white/50 backdrop-blur-xl px-12 py-8 rounded-[3rem] shadow-sm border border-white/50">
-                <span className="text-[9px] uppercase tracking-[0.5em] font-bold text-[#006D77] mb-2 opacity-80">Biological Skin Age</span>
-                <motion.span key={metrics.biological_skin_age} initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-serif text-[90px] leading-none font-bold text-charcoal tracking-tighter">
-                  {Math.round(metrics.biological_skin_age)}
-                </motion.span>
-              </div>
-            </section>
-          </div>
-
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-[320px] bg-white/80 backdrop-blur-md p-6 rounded-[2.5rem] border border-[#006D77]/10 shadow-sm mb-8">
-            <h4 className="text-[9px] uppercase tracking-[0.3em] font-bold text-[#006D77] mb-3">Clinical Insight</h4>
-            <p className="text-sm font-serif italic text-charcoal/90 leading-relaxed italic">"{consultantNote}"</p>
-          </motion.div>
-
-          <div className="hidden lg:block w-full max-w-sm bg-white/60 backdrop-blur-md p-7 rounded-[2rem] border border-white shadow-sm hover:shadow-lg transition-shadow">
-            <h4 className="text-[10px] uppercase tracking-widest font-bold text-[#006D77] mb-6">Session Origins</h4>
-            <div className="space-y-4">
-              <div className="flex items-center gap-4 text-charcoal/80 text-sm font-medium"><MapPin size={14} className="text-[#006D77]" /> Omorfia Global HQ (Demo)</div>
-              <div className="flex items-center gap-4 text-charcoal/80 text-sm font-medium"><User size={14} className="text-[#006D77]" /> Integrator UUID: 9A4-2026</div>
-              <div className="flex items-center gap-4 text-charcoal/80 text-sm font-medium"><Calendar size={14} className="text-[#006D77]" /> Valid: 12 April 2026</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="lg:col-span-7 w-full flex flex-col items-center lg:items-stretch pb-32">
-          <div className="w-[90%] mx-auto lg:w-full bg-white/80 backdrop-blur-md p-8 rounded-[2.5rem] shadow-sm border border-stone/20 mb-10 h-[380px] relative overflow-hidden hidden sm:block">
-            <div className="absolute top-6 left-8">
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-1">Architectural Shape</h3>
-              <p className="text-sm font-serif text-charcoal font-semibold">Diagnostic Radar Projection</p>
-            </div>
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart cx="50%" cy="55%" outerRadius="65%" data={radarData}>
-                <PolarGrid stroke="#EAE7E2" strokeDasharray="3 3" />
-                <PolarAngleAxis dataKey="subject" tick={{ fill: '#006D77', fontSize: 11, fontWeight: "bold" }} />
-                <Radar name="Patient" dataKey="score" stroke="#006D77" strokeWidth={2} fill="#006D77" fillOpacity={0.2} />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* THE CLOSER CARD */}
-          <div className="w-[90%] mx-auto lg:w-full bg-[#006D77] text-white rounded-[2rem] p-8 shadow-[0_20px_40px_rgb(0,109,119,0.2)] relative overflow-hidden mb-10"> 
-            <div className="relative z-10"> 
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60 mb-3">Automated Treatment Recommendation</h3> 
-              <h4 className="text-3xl font-serif mb-3 italic">{treatment.name}</h4> 
-              <p className="text-sm opacity-90 leading-relaxed font-medium"> 
+             </header>
+             <h4 className="text-5xl font-serif mb-8 italic tracking-tighter leading-tight drop-shadow-md">
+                {treatment.name}
+             </h4> 
+             <p className="text-xl opacity-90 leading-relaxed font-medium mb-12"> 
                 {treatment.description}
-              </p> 
-              <div className="mt-6 bg-white/10 border border-white/20 px-6 py-4 rounded-[1.5rem] flex justify-between items-center">
-                <span className="text-[10px] uppercase tracking-widest font-bold">Estimated Revenue</span>
-                <span className="text-2xl font-bold">${treatment.price.toLocaleString()}</span>
-              </div>
-              <button className="mt-6 w-full bg-white text-[#006D77] py-4 rounded-full text-[11px] font-bold uppercase tracking-widest hover:bg-[#F5F5DC] transition-all shadow-lg active:scale-[0.98]"> 
-                Initiate Consultation
-              </button> 
-            </div> 
-          </div> 
+             </p> 
+             <button className="w-full bg-white text-teal py-7 rounded-[2rem] text-[12px] font-black uppercase tracking-[0.3em] hover:bg-wheat transition-all shadow-2xl active:scale-[0.98]"> 
+                Initiate Consultation Sequence
+             </button> 
+          </div>
 
-
-          <div className="px-5 lg:px-0 relative z-10 w-full max-w-md lg:max-w-full mx-auto mt-8">
-            <div className="flex space-x-2 p-1.5 bg-white/60 backdrop-blur-md rounded-full shadow-sm mb-8 border border-white">
+          {/* Intelligence Deep-Dive (Metrics Section) */}
+          <section className="space-y-8">
+            <div className="flex justify-center gap-2 p-1.5 bg-white/60 backdrop-blur-md rounded-full shadow-sm border border-white">
               {(['Clarity', 'Surface', 'Foundation'] as const).map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`flex-1 py-3 px-4 rounded-full text-[10px] lg:text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 ${
-                    activeTab === tab ? 'bg-[#006D77] text-white shadow-md' : 'text-charcoal/50 hover:text-charcoal/90 hover:bg-white/50'
+                  className={`flex-1 py-4 rounded-full text-[10px] uppercase tracking-[0.3em] font-black transition-all duration-500 ${
+                    activeTab === tab ? 'bg-teal text-white shadow-xl shadow-teal/20' : 'text-stone-400 hover:text-charcoal'
                   }`}
                 >
                   {tab}
@@ -341,24 +362,36 @@ export default function LuxuryPassport() {
               ))}
             </div>
 
-            <div className="min-h-[440px]">
+            <div className="min-h-[400px]">
               <AnimatePresence mode='wait'>
-                <motion.div key={activeTab} initial={{ opacity: 0, scale: 0.98, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.98, y: -10 }} transition={{ duration: 0.4, ease: "easeOut" }} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <motion.div 
+                  key={activeTab} 
+                  initial={{ opacity: 0, scale: 0.98, y: 10 }} 
+                  animate={{ opacity: 1, scale: 1, y: 0 }} 
+                  exit={{ opacity: 0, scale: 0.98, y: -10 }} 
+                  transition={{ duration: 0.5, ease: [0.19, 1, 0.22, 1] }} 
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+                >
                   {clusters[activeTab].map(metric => (
                     <CircularProgress key={metric.label} label={metric.label} score={metric.score} />
                   ))}
                 </motion.div>
               </AnimatePresence>
             </div>
-          </div>
-        </div>
+          </section>
+        </main>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#F5F5DC] via-[#F5F5DC] to-transparent pointer-events-none z-30">
-        <button className="w-full max-w-sm mx-auto py-5 bg-[#006D77] text-white rounded-full text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-charcoal transition-all shadow-[0_10px_20px_rgb(0,109,119,0.2)] flex items-center justify-center gap-2 pointer-events-auto active:scale-[0.98]">
+      {/* 4. Fixed Action Bar (Apple-Premium) */}
+      <div className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-[#F5E6D3] via-[#F5E6D3]/90 to-transparent flex justify-center z-50 pointer-events-none">
+        <motion.button 
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="w-full max-w-sm py-6 bg-charcoal bg-opacity-95 backdrop-blur-md text-white rounded-full text-[11px] font-black uppercase tracking-[0.4em] shadow-2xl border border-white/5 pointer-events-auto flex items-center justify-center gap-4"
+        >
           Share Clinical Results
-          <Share size={15} className="mb-[2px] opacity-80" />
-        </button>
+          <Share size={18} className="opacity-80" />
+        </motion.button>
       </div>
     </div>
   );

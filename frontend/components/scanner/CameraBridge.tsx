@@ -49,7 +49,7 @@ export default function CameraBridge() {
       formData.append("file", blob, "capture.jpg");
 
       // Removed artificial stalls for high-speed clinical handover
-      const response = await fetch("http://localhost:8001/analyze", {
+      const response = await fetch("http://localhost:8000/analyze", {
         method: "POST",
         body: formData,
       });
@@ -75,6 +75,10 @@ export default function CameraBridge() {
         const leadId = payload.lead_id || crypto.randomUUID();
         
         try {
+          // Agency-specific ROI logic: Confidence weighting
+          const confidence = payload.confidence || 0.95;
+          const recommendation = payload.recommendation || (payload.melanin_index > 70 ? 'Advanced Laser Resurfacing' : 'Clinical Chemical Peel');
+
           await supabase.from('leads').insert({
             clinic_id: activeUserId,
             lead_id: leadId,
@@ -87,6 +91,8 @@ export default function CameraBridge() {
               erythema_map: payload.erythema_map || null
             },
             projected_value: calculate_revenue(payload.melanin_index || 0),
+            confidence_score: confidence,
+            treatment_recommendation: recommendation,
             raw_payload: payload
           });
         } catch (dbErr) {
